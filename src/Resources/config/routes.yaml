@@ -1,0 +1,3 @@
+growth_task_controllers:
+  resource: '../../Controller/'
+  type: attribute
