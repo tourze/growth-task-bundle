@@ -62,7 +62,7 @@ class GetTaskList extends BaseProcedure
             $tmp['finishTimes'] = $todayTotals[$tmp['id']] ?? 0;
 
             // 跳不同小程序的处理
-            if ($tmp['redirectUrl'] && mb_strstr((string) $tmp['redirectUrl'], 'appId')) {
+            if ($tmp['redirectUrl'] && strstr((string) $tmp['redirectUrl'], 'appId')) {
                 $arr = parse_url((string) $tmp['redirectUrl']);
                 parse_str($arr['query'], $query);
                 foreach ($query as $k => $v) {
