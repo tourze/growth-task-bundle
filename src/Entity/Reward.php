@@ -15,19 +15,12 @@ use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: '任务奖励')]
 #[ORM\Entity(repositoryClass: RewardRepository::class)]
 #[ORM\Table(name: 'growth_task_reward', options: ['comment' => '任务奖励'])]
 class Reward implements \Stringable, ApiArrayInterface
 {
     use TimestampableAware;
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -35,21 +28,15 @@ class Reward implements \Stringable, ApiArrayInterface
     private ?string $id = null;
 
     #[Ignore]
-    #[FormField]
-    #[ListColumn]
     #[ORM\ManyToOne(targetEntity: Record::class, inversedBy: 'rewards')]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?Record $record = null;
 
     #[Groups(['restful_read'])]
-    #[FormField]
-    #[ListColumn]
     #[ORM\ManyToOne(targetEntity: Award::class)]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Award $award = null;
 
-    #[FormField]
-    #[ListColumn]
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?UserInterface $user = null;

@@ -16,17 +16,7 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: '任务奖品')]
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[ORM\Entity(repositoryClass: AwardRepository::class)]
 #[ORM\Table(name: 'growth_task_award', options: ['comment' => '任务奖品'])]
 class Award implements \Stringable, PlainArrayInterface, AdminArrayInterface
@@ -43,35 +33,24 @@ class Award implements \Stringable, PlainArrayInterface, AdminArrayInterface
     private ?Task $task = null;
 
     #[Groups(['restful_read'])]
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 50, enumType: AwardType::class, options: ['comment' => '类型'])]
     private AwardType $type;
 
     #[Groups(['restful_read'])]
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 100, options: ['comment' => '名称'])]
     private ?string $name = null;
 
     #[Groups(['restful_read'])]
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '奖项'])]
     private ?string $value = null;
 
     #[Groups(['restful_read'])]
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '完成次数', 'default' => 1])]
     private ?int $times = null;
 
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, enumType: RangeType::class, options: ['comment' => '次数范围', 'default' => 'equals'])]
     private ?RangeType $rangeType = null;
 
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
 
@@ -79,7 +58,6 @@ class Award implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['default' => 1, 'comment' => '乐观锁版本号'])]
     private ?int $lockVersion = null;
 
-    #[FormField]
     #[ORM\Column(length: 30, nullable: true, options: ['comment' => '奖品描述'])]
     private ?string $description = null;
 

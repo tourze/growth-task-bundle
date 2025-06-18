@@ -16,18 +16,12 @@ use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
 use Tourze\EasyAdmin\Attribute\Action\Listable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
 /**
  * 完成之后才会产生任务记录
  */
 #[Listable]
-#[Deletable]
-#[AsPermission(title: '任务记录')]
 #[ORM\Entity(repositoryClass: RecordRepository::class)]
 #[ORM\Table(name: 'growth_task_record', options: ['comment' => '任务记录'])]
 class Record implements PlainArrayInterface, \Stringable
@@ -35,22 +29,18 @@ class Record implements PlainArrayInterface, \Stringable
     #[Groups(['admin_curd'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ListColumn]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '记录ID'])]
     private ?int $id = 0;
 
     #[Groups(['restful_read', 'admin_curd'])]
-    #[ListColumn(title: '任务')]
     #[ORM\ManyToOne(targetEntity: Task::class, inversedBy: 'records')]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?Task $task = null;
 
-    #[ListColumn(title: '用户')]
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?UserInterface $user = null;
 
-    #[ListColumn]
     #[Groups(['restful_read', 'admin_curd'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
@@ -58,7 +48,6 @@ class Record implements PlainArrayInterface, \Stringable
     /**
      * @var Collection<Reward>
      */
-    #[ListColumn(title: '奖品')]
     #[Groups(['restful_read', 'admin_curd'])]
     #[ORM\OneToMany(mappedBy: 'record', targetEntity: Reward::class)]
     private Collection $rewards;
@@ -72,8 +61,6 @@ class Record implements PlainArrayInterface, \Stringable
     private ?string $updatedFromIp = null;
 
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
     #[CreateTimeColumn]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTimeInterface $createTime = null;

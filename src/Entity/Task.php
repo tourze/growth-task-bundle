@@ -21,22 +21,10 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
 use Tourze\EasyAdmin\Attribute\Action\CurdAction;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
 use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: '任务配置')]
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 #[ORM\Table(name: 'growth_task_task', options: ['comment' => '任务配置'])]
 class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, AdminArrayInterface
@@ -47,8 +35,6 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
      * order值大的排序靠前。有效的值范围是[0, 2^32].
      */
     #[IndexColumn]
-    #[FormField]
-    #[ListColumn(order: 95, sorter: true)]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['default' => '0', 'comment' => '次序值'])]
     private ?int $sortNumber = 0;
 
@@ -79,40 +65,29 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
     private ?string $updatedBy = null;
 
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[BoolColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
-    #[ListColumn(order: 97)]
-    #[FormField(order: 97)]
     private ?bool $valid = false;
 
-    #[FormField(title: '分组')]
-    #[ListColumn(title: '分组')]
     #[ORM\ManyToOne(targetEntity: Grouping::class, inversedBy: 'tasks')]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Grouping $grouping = null;
 
-    #[FormField]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '标题'])]
     private ?string $title = null;
 
-    #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '描述'])]
     private ?string $description = null;
 
-    #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '奖励描述'])]
     private ?string $awardDescription = null;
@@ -121,69 +96,54 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
      * @var Collection<Award>
      */
     #[Groups(['restful_read'])]
-    #[ListColumn(title: '奖品')]
     #[CurdAction(label: '奖品', drawerWidth: 1200)]
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: Award::class, orphanRemoval: true)]
     private Collection $awards;
 
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '当前进度'])]
     private ?string $currentProgress = null;
 
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '总进度'])]
     private ?string $totalProgress = null;
 
-    #[ListColumn]
-    #[FormField(span: 10)]
     #[Groups(['restful_read'])]
     #[ORM\Column(length: 20, nullable: true, enumType: TaskLimitType::class, options: ['comment' => '限制维度', 'default' => 'day'])]
     private ?TaskLimitType $limitType = null;
 
-    #[FormField(span: 8)]
-    #[ListColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '限制次数'])]
     private ?int $limitTimes = null;
 
     #[Groups(['restful_read'])]
-    #[FormField]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '限制开始时间'])]
     private ?\DateTimeInterface $startTime = null;
 
     #[Groups(['restful_read'])]
-    #[FormField]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '限制结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
-    #[FormField(title: '任务类型')]
-    #[ListColumn(title: '任务类型')]
     #[ORM\ManyToOne(targetEntity: TaskType::class)]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?TaskType $type = null;
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '跳转路径'])]
-    #[FormField]
     #[Groups(['restful_read'])]
     private ?string $redirectUrl = null;
 
     #[ImagePickerField]
     #[PictureColumn]
-    #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => 'logo'])]
     private ?string $logo = '';
 
     #[ImagePickerField]
     #[PictureColumn]
-    #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '进行中按钮'])]
     private ?string $buttonDoing = '';
 
     #[ImagePickerField]
     #[PictureColumn]
-    #[FormField]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '已完成按钮'])]
     private ?string $buttonFinished = '';
@@ -196,14 +156,12 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     private Collection $records;
 
     #[Groups(['restful_read'])]
-    #[FormField]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => 'Tracking'])]
     private ?string $tracking = null;
 
     /**
      * @var Collection<TaskAttribute>
      */
-    #[ListColumn(title: '属性')]
     #[CurdAction(label: '属性', drawerWidth: 1200)]
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: TaskAttribute::class)]
     private Collection $taskAttributes;

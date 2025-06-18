@@ -9,26 +9,13 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: '任务属性')]
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[ORM\Entity(repositoryClass: TaskAttributeRepository::class)]
 #[ORM\Table(name: 'growth_task_task_attribute', options: ['comment' => '任务属性'])]
 #[ORM\UniqueConstraint(name: 'idx_uniq_task_name', columns: ['task_id', 'name'])]
 class TaskAttribute implements \Stringable
 {
     use TimestampableAware;
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -47,13 +34,9 @@ class TaskAttribute implements \Stringable
     #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
     private ?string $updatedBy = null;
 
-    #[FormField(span: 6)]
-    #[ListColumn]
     #[ORM\Column(length: 100, options: ['comment' => '名称'])]
     private ?string $name = null;
 
-    #[FormField(span: 8)]
-    #[ListColumn]
     #[ORM\Column(length: 255, options: ['comment' => '内容'])]
     private ?string $value = null;
 
