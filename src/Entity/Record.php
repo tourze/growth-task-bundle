@@ -11,10 +11,9 @@ use GrowthTaskBundle\Repository\RecordRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Tourze\Arrayable\PlainArrayInterface;
-use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
+use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\EasyAdmin\Attribute\Action\Listable;
 
@@ -26,6 +25,8 @@ use Tourze\EasyAdmin\Attribute\Action\Listable;
 #[ORM\Table(name: 'growth_task_record', options: ['comment' => '任务记录'])]
 class Record implements PlainArrayInterface, \Stringable
 {
+    use CreateTimeAware;
+
     #[Groups(['admin_curd'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -59,11 +60,6 @@ class Record implements PlainArrayInterface, \Stringable
     #[UpdateIpColumn]
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
     private ?string $updatedFromIp = null;
-
-    #[IndexColumn]
-    #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
-    private ?\DateTimeInterface $createTime = null;
 
     #[CreatedByColumn]
     #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
@@ -201,17 +197,5 @@ class Record implements PlainArrayInterface, \Stringable
     public function getUpdatedFromIp(): ?string
     {
         return $this->updatedFromIp;
-    }
-
-    public function setCreateTime(?\DateTimeInterface $createdAt): self
-    {
-        $this->createTime = $createdAt;
-
-        return $this;
-    }
-
-    public function getCreateTime(): ?\DateTimeInterface
-    {
-        return $this->createTime;
     }
 }
