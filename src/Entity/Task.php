@@ -19,23 +19,17 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\CurdAction;
-use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
-use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 #[ORM\Table(name: 'growth_task_task', options: ['comment' => '任务配置'])]
 class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, AdminArrayInterface
 {
     use TimestampableAware;
+    use BlameableAware;
 
-    /**
-     * order值大的排序靠前。有效的值范围是[0, 2^32].
-     */
     #[IndexColumn]
-    #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['default' => '0', 'comment' => '次序值'])]
+    #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['default' => '0', 'comment' => '次序值，order值大的排序靠前。有效的值范围是[0, 2^32]'])]
     private ?int $sortNumber = 0;
 
     public function getSortNumber(): ?int
@@ -56,14 +50,6 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
             'sortNumber' => $this->getSortNumber(),
         ];
     }
-
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -96,7 +82,6 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
      * @var Collection<Award>
      */
     #[Groups(['restful_read'])]
-    #[CurdAction(label: '奖品', drawerWidth: 1200)]
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: Award::class, orphanRemoval: true)]
     private Collection $awards;
 
@@ -115,11 +100,11 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     private ?int $limitTimes = null;
 
     #[Groups(['restful_read'])]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '限制开始时间'])]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '限制开始时间'])]
     private ?\DateTimeInterface $startTime = null;
 
     #[Groups(['restful_read'])]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '限制结束时间'])]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '限制结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
     #[ORM\ManyToOne(targetEntity: TaskType::class)]
@@ -130,20 +115,14 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     #[Groups(['restful_read'])]
     private ?string $redirectUrl = null;
 
-    #[ImagePickerField]
-    #[PictureColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => 'logo'])]
     private ?string $logo = '';
 
-    #[ImagePickerField]
-    #[PictureColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '进行中按钮'])]
     private ?string $buttonDoing = '';
 
-    #[ImagePickerField]
-    #[PictureColumn]
     #[Groups(['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '已完成按钮'])]
     private ?string $buttonFinished = '';
@@ -162,7 +141,6 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     /**
      * @var Collection<TaskAttribute>
      */
-    #[CurdAction(label: '属性', drawerWidth: 1200)]
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: TaskAttribute::class)]
     private Collection $taskAttributes;
 
@@ -183,36 +161,13 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null || $this->getId() === '') {
             return '';
         }
 
         return "{$this->getId()}:{$this->getTitle()}";
     }
 
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
-    }
 
     public function isValid(): ?bool
     {

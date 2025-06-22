@@ -11,13 +11,15 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
 #[ORM\Entity(repositoryClass: GroupingRepository::class)]
 #[ORM\Table(name: 'growth_task_grouping', options: ['comment' => '任务分组'])]
 class Grouping implements \Stringable
 {
+    use TimestampableAware;
+    use BlameableAware;
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -27,15 +29,6 @@ class Grouping implements \Stringable
     {
         return $this->id;
     }
-    use TimestampableAware;
-
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[ORM\Column(type: Types::STRING, length: 100, unique: true, options: ['comment' => '标题'])]
     private ?string $title = null;
@@ -62,35 +55,11 @@ class Grouping implements \Stringable
 
     public function __toString(): string
     {
-        if (!$this->id) {
+        if ($this->id === null || $this->id === 0) {
             return '';
         }
 
         return $this->getTitle() ?: '';
-    }
-
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
     }
 
     public function getTitle(): ?string

@@ -2,7 +2,7 @@
 
 namespace GrowthTaskBundle\Service;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use CreditBundle\Service\AccountService;
 use CreditBundle\Service\CurrencyService;
 use CreditBundle\Service\TransactionService;
@@ -75,7 +75,7 @@ class TaskService
             'valid' => true,
         ]);
 
-        if (!$task) {
+        if ($task === null) {
             return '';
         }
 
@@ -140,7 +140,7 @@ class TaskService
         $awards = $this->getUserTaskAward($times, $task);
         $rewardValue = '';
         foreach ($awards as $award) {
-            if (AwardType::CREDIT === $award->getType() && $this->accountService && $this->transactionService) {
+            if (AwardType::CREDIT === $award->getType() && $this->accountService !== null && $this->transactionService !== null) {
                 if ($award->getValue() < 0) {
                     continue;
                 }
@@ -166,7 +166,7 @@ class TaskService
                 $desc = $rewardValue = $award->getValue();
             }
 
-            if (AwardType::LOTTERY === $award->getType() && $this->activityRepository) {
+            if (AwardType::LOTTERY === $award->getType() && $this->activityRepository !== null) {
                 // 给抽奖机会，格式是 抽奖活动id | 抽奖次数
                 $lotteryId = $award->getValue();
                 $lotteryTime = 1;
@@ -180,17 +180,17 @@ class TaskService
                     $chance = new Chance();
                     $chance->setActivity($this->activityRepository->find($lotteryId));
                     $chance->setValid(true);
-                    $chance->setStartTime(Carbon::now());
+                    $chance->setStartTime(CarbonImmutable::now());
                     // 结束时间判断
                     switch ($task->getLimitType()) {
                         case TaskLimitType::DAY:
-                            $chance->setExpireTime(Carbon::now()->endOfDay());
+                            $chance->setExpireTime(CarbonImmutable::now()->endOfDay());
                             break;
                         case TaskLimitType::MONTH:
-                            $chance->setExpireTime(Carbon::now()->endOfMonth());
+                            $chance->setExpireTime(CarbonImmutable::now()->endOfMonth());
                             break;
                         case TaskLimitType::YEAR:
-                            $chance->setExpireTime(Carbon::now()->endOfYear());
+                            $chance->setExpireTime(CarbonImmutable::now()->endOfYear());
                             break;
                         case TaskLimitType::ACTIVITY_TIME:
                             $chance->setExpireTime($task->getEndTime());
@@ -216,8 +216,8 @@ class TaskService
                 $offerChance = new OfferChance();
                 $offerChance->setTitle("完成任务获得SKU资格[{$award->getValue()}]");
                 $offerChance->setUser($user);
-                $offerChance->setStartTime(Carbon::now());
-                $offerChance->setEndTime(Carbon::now()->subYear());
+                $offerChance->setStartTime(CarbonImmutable::now());
+                $offerChance->setEndTime(CarbonImmutable::now()->subYear());
                 $offerChance->setValid(true);
 
                 foreach ($spu->getSkus() as $sku) {
@@ -262,17 +262,17 @@ class TaskService
         switch ($task->getLimitType()) {
             case TaskLimitType::DAY:
                 $qb->andWhere('r.createTime >= :createTime')
-                    ->setParameter('createTime', Carbon::today());
+                    ->setParameter('createTime', CarbonImmutable::today());
                 break;
             case TaskLimitType::MONTH:
                 $qb->andWhere('r.createTime >= :start and r.createTime <= :end')
-                    ->setParameter('start', Carbon::today()->startOfMonth())
-                    ->setParameter('end', Carbon::today()->endOfMonth());
+                    ->setParameter('start', CarbonImmutable::today()->startOfMonth())
+                    ->setParameter('end', CarbonImmutable::today()->endOfMonth());
                 break;
             case TaskLimitType::YEAR:
                 $qb->andWhere('r.createTime >= :start and r.createTime <= :end')
-                    ->setParameter('start', Carbon::today()->startOfYear())
-                    ->setParameter('end', Carbon::today()->endOfYear());
+                    ->setParameter('start', CarbonImmutable::today()->startOfYear())
+                    ->setParameter('end', CarbonImmutable::today()->endOfYear());
                 break;
             case TaskLimitType::ACTIVITY_TIME:
                 $qb->andWhere('r.createTime >= :start and r.createTime <= :end')

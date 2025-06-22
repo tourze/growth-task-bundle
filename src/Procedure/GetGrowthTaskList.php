@@ -2,7 +2,7 @@
 
 namespace GrowthTaskBundle\Procedure;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use GrowthTaskBundle\Repository\GroupingRepository;
 use GrowthTaskBundle\Repository\RecordRepository;
 use GrowthTaskBundle\Repository\TaskRepository;
@@ -58,14 +58,14 @@ class GetGrowthTaskList extends BaseProcedure
             $totals[$item['task']] = $item['total'];
         }
 
-        $day = Carbon::today();
+        $day = CarbonImmutable::today();
         $todayTotalsTmp = $this->recordRepository->createQueryBuilder('r')
             ->select('count(r.id) as total,identity(r.task) as task')
             ->where('r.user = :user')
             ->setParameter('user', $this->security->getUser())
             ->andWhere('r.createTime between :start and :end')
-            ->setParameter('start', $day->clone()->startOfDay())
-            ->setParameter('end', $day->clone()->endOfDay())
+            ->setParameter('start', $day->startOfDay())
+            ->setParameter('end', $day->endOfDay())
             ->groupBy('r.task')
             ->getQuery()
             ->getArrayResult();

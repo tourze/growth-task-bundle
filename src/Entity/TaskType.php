@@ -9,22 +9,14 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
 #[ORM\Entity(repositoryClass: TaskTypeRepository::class)]
 #[ORM\Table(name: 'growth_task_type', options: ['comment' => '任务类型'])]
 class TaskType implements \Stringable
 {
     use TimestampableAware;
-
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
+    use BlameableAware;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -49,35 +41,11 @@ class TaskType implements \Stringable
 
     public function __toString(): string
     {
-        if (!$this->id) {
+        if ($this->id === null || $this->id === 0) {
             return '';
         }
 
         return "{$this->getTitle()} : {$this->getCode()}";
-    }
-
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
     }
 
     public function getId(): ?int

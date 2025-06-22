@@ -39,10 +39,10 @@ class GetTaskRecord extends BaseProcedure
             ->where('r.user = :user')
             ->setParameter('user', $this->security->getUser());
 
-        if ($this->awardType) {
+        if ($this->awardType !== '') {
             $qb->innerJoin('r.rewards', 're')
                 ->innerJoin('re.award', 'a')
-                ->andwhere('a.type = :type')
+                ->andWhere('a.type = :type')
                 ->setParameter('type', AwardType::tryFrom($this->awardType));
         }
 

@@ -7,8 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use GrowthTaskBundle\Repository\TaskAttributeRepository;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
 #[ORM\Entity(repositoryClass: TaskAttributeRepository::class)]
 #[ORM\Table(name: 'growth_task_task_attribute', options: ['comment' => '任务属性'])]
@@ -16,6 +15,8 @@ use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
 class TaskAttribute implements \Stringable
 {
     use TimestampableAware;
+    use BlameableAware;
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -25,14 +26,6 @@ class TaskAttribute implements \Stringable
     {
         return $this->id;
     }
-
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[ORM\Column(length: 100, options: ['comment' => '名称'])]
     private ?string $name = null;
@@ -47,35 +40,11 @@ class TaskAttribute implements \Stringable
 
     public function __toString()
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null || $this->getId() === 0) {
             return '';
         }
 
         return "{$this->getName()}:{$this->getValue()}";
-    }
-
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
     }
 
     public function getName(): ?string

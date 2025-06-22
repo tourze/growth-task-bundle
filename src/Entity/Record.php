@@ -14,18 +14,17 @@ use Tourze\Arrayable\PlainArrayInterface;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\CreateTimeAware;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Listable;
+use Tourze\DoctrineUserBundle\Traits\CreatedByAware;
 
 /**
  * 完成之后才会产生任务记录
  */
-#[Listable]
 #[ORM\Entity(repositoryClass: RecordRepository::class)]
 #[ORM\Table(name: 'growth_task_record', options: ['comment' => '任务记录'])]
 class Record implements PlainArrayInterface, \Stringable
 {
     use CreateTimeAware;
+    use CreatedByAware;
 
     #[Groups(['admin_curd'])]
     #[ORM\Id]
@@ -61,19 +60,6 @@ class Record implements PlainArrayInterface, \Stringable
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
     private ?string $updatedFromIp = null;
 
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    public function setCreatedBy(?string $createdBy): void
-    {
-        $this->createdBy = $createdBy;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
 
     public function __construct()
     {
@@ -82,7 +68,7 @@ class Record implements PlainArrayInterface, \Stringable
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null || $this->getId() === 0) {
             return '';
         }
 
