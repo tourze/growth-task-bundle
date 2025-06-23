@@ -24,7 +24,7 @@ use LotteryBundle\Repository\ActivityRepository;
 use LotteryBundle\Service\LotteryService;
 use OrderBundle\Entity\OfferChance;
 use OrderBundle\Entity\OfferSku;
-use ProductBundle\Repository\SpuRepository;
+use ProductCoreBundle\Repository\SpuRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\Security\Core\User\UserInterface;
