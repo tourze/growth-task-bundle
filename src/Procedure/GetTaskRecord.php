@@ -15,15 +15,15 @@ use Tourze\JsonRPC\Core\Attribute\MethodTag;
 use Tourze\JsonRPC\Core\Procedure\BaseProcedure;
 use Tourze\JsonRPCPaginatorBundle\Procedure\PaginatorTrait;
 
-#[MethodExpose('GetTaskRecord')]
-#[MethodTag('任务模块')]
-#[MethodDoc('获取任务的完成记录以及对应奖励')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[MethodExpose(method: 'GetTaskRecord')]
+#[MethodTag(name: '任务模块')]
+#[MethodDoc(summary: '获取任务的完成记录以及对应奖励')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 class GetTaskRecord extends BaseProcedure
 {
     use PaginatorTrait;
 
-    #[MethodParam('奖励类型')]
+    #[MethodParam(description: '奖励类型')]
     public string $awardType = '';
 
     public function __construct(

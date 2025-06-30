@@ -14,14 +14,14 @@ use Tourze\JsonRPC\Core\Exception\ApiException;
 use Tourze\JsonRPCLockBundle\Procedure\LockableProcedure;
 use Tourze\JsonRPCLogBundle\Attribute\Log;
 
-#[MethodExpose('ReportTask')]
-#[MethodTag('任务模块')]
-#[MethodDoc('任务完成上报接口')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[MethodExpose(method: 'ReportTask')]
+#[MethodTag(name: '任务模块')]
+#[MethodDoc(summary: '任务完成上报接口')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 #[Log]
 class ReportTask extends LockableProcedure
 {
-    #[MethodParam('任务ID')]
+    #[MethodParam(description: '任务ID')]
     public string $taskId;
 
     public function __construct(

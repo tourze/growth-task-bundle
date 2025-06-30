@@ -23,11 +23,11 @@ class TaskType implements \Stringable
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '类型ID'])]
     private ?int $id = 0;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, options: ['comment' => '标题'])]
     private ?string $title = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, unique: true, options: ['comment' => '标识'])]
     private ?string $code = null;
 

@@ -17,15 +17,15 @@ use Tourze\JsonRPC\Core\Exception\ApiException;
 use Tourze\JsonRPCLockBundle\Procedure\LockableProcedure;
 use Tourze\JsonRPCLogBundle\Attribute\Log;
 
-#[MethodTag('任务模块')]
-#[MethodDoc('标记任务奖励完成')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
-#[MethodExpose('UpdateTaskRewardsUsed')]
+#[MethodTag(name: '任务模块')]
+#[MethodDoc(summary: '标记任务奖励完成')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
+#[MethodExpose(method: 'UpdateTaskRewardsUsed')]
 #[Log]
-#[WithMonologChannel('procedure')]
+#[WithMonologChannel(channel: 'procedure')]
 class UpdateTaskRewardsUsed extends LockableProcedure
 {
-    #[MethodParam('任务ID')]
+    #[MethodParam(description: '任务ID')]
     public string $taskId;
 
     public function __construct(

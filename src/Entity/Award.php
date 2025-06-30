@@ -32,19 +32,19 @@ class Award implements \Stringable, PlainArrayInterface, AdminArrayInterface
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Task $task = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 50, enumType: AwardType::class, options: ['comment' => '类型'])]
     private AwardType $type;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, options: ['comment' => '名称'])]
     private ?string $name = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '奖项'])]
     private ?string $value = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '完成次数', 'default' => 1])]
     private ?int $times = null;
 

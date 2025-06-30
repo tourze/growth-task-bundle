@@ -16,7 +16,7 @@ use Tourze\Arrayable\PlainArrayInterface;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
@@ -27,6 +27,7 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
 {
     use TimestampableAware;
     use BlameableAware;
+    use SnowflakeKeyAware;
 
     #[IndexColumn]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['default' => '0', 'comment' => '次序值，order值大的排序靠前。有效的值范围是[0, 2^32]'])]
@@ -51,12 +52,6 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
         ];
     }
 
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
-    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
-    private ?string $id = null;
-
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
@@ -66,22 +61,22 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Grouping $grouping = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '标题'])]
     private ?string $title = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '描述'])]
     private ?string $description = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '奖励描述'])]
     private ?string $awardDescription = null;
 
     /**
      * @var Collection<Award>
      */
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: Award::class, orphanRemoval: true)]
     private Collection $awards;
 
@@ -91,19 +86,19 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '总进度'])]
     private ?string $totalProgress = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(length: 20, nullable: true, enumType: TaskLimitType::class, options: ['comment' => '限制维度', 'default' => 'day'])]
     private ?TaskLimitType $limitType = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '限制次数'])]
     private ?int $limitTimes = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '限制开始时间'])]
     private ?\DateTimeInterface $startTime = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '限制结束时间'])]
     private ?\DateTimeInterface $endTime = null;
 
@@ -112,18 +107,18 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     private ?TaskType $type = null;
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '跳转路径'])]
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     private ?string $redirectUrl = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => 'logo'])]
     private ?string $logo = '';
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '进行中按钮'])]
     private ?string $buttonDoing = '';
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '已完成按钮'])]
     private ?string $buttonFinished = '';
 
@@ -134,7 +129,7 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: Record::class)]
     private Collection $records;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => 'Tracking'])]
     private ?string $tracking = null;
 
@@ -181,10 +176,6 @@ class Task implements \Stringable, PlainArrayInterface, ApiArrayInterface, Admin
         return $this;
     }
 
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
 
     public function getTitle(): ?string
     {

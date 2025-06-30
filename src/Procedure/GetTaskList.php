@@ -13,12 +13,12 @@ use Tourze\JsonRPC\Core\Attribute\MethodParam;
 use Tourze\JsonRPC\Core\Attribute\MethodTag;
 use Tourze\JsonRPC\Core\Procedure\BaseProcedure;
 
-#[MethodExpose('GetTaskList')]
-#[MethodTag('任务模块')]
-#[MethodDoc('获取分组下的所有任务')]
+#[MethodExpose(method: 'GetTaskList')]
+#[MethodTag(name: '任务模块')]
+#[MethodDoc(summary: '获取分组下的所有任务')]
 class GetTaskList extends BaseProcedure
 {
-    #[MethodParam('分组名')]
+    #[MethodParam(description: '分组名')]
     public string $group;
 
     public function __construct(

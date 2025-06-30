@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\Arrayable\ApiArrayInterface;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
@@ -21,18 +21,14 @@ class Reward implements \Stringable, ApiArrayInterface
 {
     use TimestampableAware;
     use BlameableAware;
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
-    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
-    private ?string $id = null;
+    use SnowflakeKeyAware;
 
     #[Ignore]
     #[ORM\ManyToOne(targetEntity: Record::class, inversedBy: 'rewards')]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?Record $record = null;
 
-    #[Groups(['restful_read'])]
+    #[Groups(groups: ['restful_read'])]
     #[ORM\ManyToOne(targetEntity: Award::class)]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Award $award = null;
@@ -64,10 +60,6 @@ class Reward implements \Stringable, ApiArrayInterface
         return "{$this->getAward()->getName()}:{$this->getAward()->getValue()}";
     }
 
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
 
     public function getRecord(): ?Record
     {

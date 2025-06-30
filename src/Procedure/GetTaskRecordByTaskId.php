@@ -13,13 +13,13 @@ use Tourze\JsonRPC\Core\Attribute\MethodTag;
 use Tourze\JsonRPC\Core\Exception\ApiException;
 use Tourze\JsonRPC\Core\Procedure\BaseProcedure;
 
-#[MethodExpose('GetTaskRecordByTaskId')]
-#[MethodTag('任务模块')]
-#[MethodDoc('根据任务ID获取任务的完成记录以及对应奖励')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[MethodExpose(method: 'GetTaskRecordByTaskId')]
+#[MethodTag(name: '任务模块')]
+#[MethodDoc(summary: '根据任务ID获取任务的完成记录以及对应奖励')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 class GetTaskRecordByTaskId extends BaseProcedure
 {
-    #[MethodParam('任务ID')]
+    #[MethodParam(description: '任务ID')]
     public string $taskId;
 
     public function __construct(

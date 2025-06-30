@@ -11,16 +11,16 @@ use Tourze\JsonRPC\Core\Attribute\MethodParam;
 use Tourze\JsonRPC\Core\Attribute\MethodTag;
 use Tourze\JsonRPC\Core\Procedure\BaseProcedure;
 
-#[MethodExpose('GetTaskInfo')]
-#[MethodTag('任务模块')]
-#[MethodDoc('获取某个任务')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[MethodExpose(method: 'GetTaskInfo')]
+#[MethodTag(name: '任务模块')]
+#[MethodDoc(summary: '获取某个任务')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 class GetTaskInfo extends BaseProcedure
 {
-    #[MethodParam('页面路径')]
+    #[MethodParam(description: '页面路径')]
     public string $page;
 
-    #[MethodParam('分组名')]
+    #[MethodParam(description: '分组名')]
     public string $group;
 
     public function __construct(

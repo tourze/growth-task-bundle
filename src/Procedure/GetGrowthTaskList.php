@@ -17,13 +17,13 @@ use Tourze\JsonRPC\Core\Procedure\BaseProcedure;
 /**
  * 获取分组下的所有任务
  */
-#[MethodExpose('GetGrowthTaskList')]
-#[MethodTag('任务模块')]
-#[MethodDoc('获取分组下的所有任务')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[MethodExpose(method: 'GetGrowthTaskList')]
+#[MethodTag(name: '任务模块')]
+#[MethodDoc(summary: '获取分组下的所有任务')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 class GetGrowthTaskList extends BaseProcedure
 {
-    #[MethodParam('分组名')]
+    #[MethodParam(description: '分组名')]
     public string $group = '';
 
     public function __construct(

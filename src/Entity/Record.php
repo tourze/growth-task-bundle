@@ -26,13 +26,13 @@ class Record implements PlainArrayInterface, \Stringable
     use CreateTimeAware;
     use CreatedByAware;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '记录ID'])]
     private ?int $id = 0;
 
-    #[Groups(['restful_read', 'admin_curd'])]
+    #[Groups(groups: ['restful_read', 'admin_curd'])]
     #[ORM\ManyToOne(targetEntity: Task::class, inversedBy: 'records')]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?Task $task = null;
@@ -41,14 +41,14 @@ class Record implements PlainArrayInterface, \Stringable
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?UserInterface $user = null;
 
-    #[Groups(['restful_read', 'admin_curd'])]
+    #[Groups(groups: ['restful_read', 'admin_curd'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
 
     /**
      * @var Collection<Reward>
      */
-    #[Groups(['restful_read', 'admin_curd'])]
+    #[Groups(groups: ['restful_read', 'admin_curd'])]
     #[ORM\OneToMany(mappedBy: 'record', targetEntity: Reward::class)]
     private Collection $rewards;
 

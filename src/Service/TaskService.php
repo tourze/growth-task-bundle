@@ -10,6 +10,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use GrowthTaskBundle\Entity\Record;
 use GrowthTaskBundle\Entity\Reward;
 use GrowthTaskBundle\Entity\Task;
+use GrowthTaskBundle\Exception\RewardNotFoundException;
+use GrowthTaskBundle\Exception\TaskTypeNotFoundException;
 use GrowthTaskBundle\Enum\AwardType;
 use GrowthTaskBundle\Enum\TaskLimitType;
 use GrowthTaskBundle\Event\BeforeSaveTaskRecordEvent;
@@ -22,14 +24,12 @@ use GrowthTaskBundle\Repository\TaskTypeRepository;
 use LotteryBundle\Entity\Chance;
 use LotteryBundle\Repository\ActivityRepository;
 use LotteryBundle\Service\LotteryService;
-use OrderBundle\Entity\OfferChance;
-use OrderBundle\Entity\OfferSku;
-use ProductCoreBundle\Repository\SpuRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Tourze\JsonRPC\Core\Exception\ApiException;
+use Tourze\ProductCoreBundle\Repository\SpuRepository;
 use Tourze\SnowflakeBundle\Service\Snowflake;
 
 #[Autoconfigure(public: true)]
@@ -66,7 +66,7 @@ class TaskService
             'code' => $typeStr,
         ]);
         if (empty($type)) {
-            throw new \Exception("任务类型[{$typeStr}]不存在");
+            throw new TaskTypeNotFoundException($typeStr);
         }
 
         // 同样类型的任务可能存在多个
@@ -208,29 +208,69 @@ class TaskService
             }
 
             if (AwardType::MATERIAL === $award->getType()) {
+                // 实物奖励功能需要 order-core-bundle 支持
+                // 当未安装 order-core-bundle 时，记录警告并跳过
+                if ($this->spuRepository === null) {
+                    $this->logger->warning('实物奖励功能需要配置 SpuRepository', [
+                        'award' => $award,
+                        'user' => $user,
+                    ]);
+                    continue;
+                }
+
                 $spu = $this->spuRepository->find($award->getValue());
                 if (empty($spu) || empty($spu->getSkus())) {
-                    throw new \Exception('获取奖品失败');
+                    throw new RewardNotFoundException();
                 }
 
-                $offerChance = new OfferChance();
-                $offerChance->setTitle("完成任务获得SKU资格[{$award->getValue()}]");
-                $offerChance->setUser($user);
-                $offerChance->setStartTime(CarbonImmutable::now());
-                $offerChance->setEndTime(CarbonImmutable::now()->subYear());
-                $offerChance->setValid(true);
+                // 使用反射来动态创建实例，避免硬依赖 order-core-bundle
+                try {
+                    $offerChanceClass = 'Tourze\OrderCoreBundle\Entity\OfferChance';
+                    $offerSkuClass = 'Tourze\OrderCoreBundle\Entity\OfferSku';
 
-                foreach ($spu->getSkus() as $sku) {
-                    $offerSku = new OfferSku();
-                    $offerSku->setChance($offerChance);
-                    $offerSku->setSku($sku);
-                    $offerSku->setQuantity(1);
-                    $offerChance->addSku($offerSku);
+                    if (!class_exists($offerChanceClass) || !class_exists($offerSkuClass)) {
+                        $this->logger->warning('实物奖励功能需要 order-core-bundle 包支持', [
+                            'award' => $award,
+                            'user' => $user,
+                        ]);
+                        continue;
+                    }
+
+                    /** @phpstan-ignore-next-line */
+                    $offerChanceReflection = new \ReflectionClass($offerChanceClass);
+                    $offerChance = $offerChanceReflection->newInstance();
+
+                    // 设置属性
+                    $offerChanceReflection->getMethod('setTitle')->invoke($offerChance, "完成任务获得SKU资格[{$award->getValue()}]");
+                    $offerChanceReflection->getMethod('setUser')->invoke($offerChance, $user);
+                    $offerChanceReflection->getMethod('setStartTime')->invoke($offerChance, CarbonImmutable::now());
+                    $offerChanceReflection->getMethod('setEndTime')->invoke($offerChance, CarbonImmutable::now()->addYear());
+                    $offerChanceReflection->getMethod('setValid')->invoke($offerChance, true);
+
+                    /** @phpstan-ignore-next-line */
+                    $offerSkuReflection = new \ReflectionClass($offerSkuClass);
+                    
+                    foreach ($spu->getSkus() as $sku) {
+                        $offerSku = $offerSkuReflection->newInstance();
+                        $offerSkuReflection->getMethod('setChance')->invoke($offerSku, $offerChance);
+                        $offerSkuReflection->getMethod('setSku')->invoke($offerSku, $sku);
+                        $offerSkuReflection->getMethod('setQuantity')->invoke($offerSku, 1);
+                        $offerChanceReflection->getMethod('addSku')->invoke($offerChance, $offerSku);
+                    }
+
+                    $this->entityManager->persist($offerChance);
+                    $this->entityManager->flush();
+                    
+                    $getIdMethod = $offerChanceReflection->getMethod('getId');
+                    $desc = $rewardValue = $getIdMethod->invoke($offerChance);
+                } catch (\ReflectionException $e) {
+                    $this->logger->error('创建实物奖励失败', [
+                        'error' => $e->getMessage(),
+                        'award' => $award,
+                        'user' => $user,
+                    ]);
+                    continue;
                 }
-
-                $this->entityManager->persist($offerChance);
-                $this->entityManager->flush();
-                $desc = $rewardValue = $offerChance->getId();
             }
 
             $reward = new Reward();

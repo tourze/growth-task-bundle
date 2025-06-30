@@ -59,7 +59,7 @@ class Grouping implements \Stringable
             return '';
         }
 
-        return $this->getTitle() ?: '';
+        return $this->getTitle() ?? '';
     }
 
     public function getTitle(): ?string
